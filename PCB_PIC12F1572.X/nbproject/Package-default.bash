@@ -10,9 +10,9 @@ CND_CONF=default
 CND_DISTDIR=dist
 TMPDIR=build/${CND_CONF}/${IMAGE_TYPE}/tmp-packaging
 TMPDIRNAME=tmp-packaging
-OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/20180213_ADAS_DVR2_DIR.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-OUTPUT_BASENAME=20180213_ADAS_DVR2_DIR.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
-PACKAGE_TOP_DIR=20180213adasdvr2dir.x/
+OUTPUT_PATH=dist/${CND_CONF}/${IMAGE_TYPE}/PCB_PIC12F1572.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+OUTPUT_BASENAME=PCB_PIC12F1572.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}
+PACKAGE_TOP_DIR=pcbpic12f1572.x/
 
 # Functions
 function checkReturnCode
@@ -57,15 +57,15 @@ mkdir -p ${TMPDIR}
 
 # Copy files and create directories and links
 cd "${TOP}"
-makeDirectory ${TMPDIR}/20180213adasdvr2dir.x/bin
+makeDirectory ${TMPDIR}/pcbpic12f1572.x/bin
 copyFileToTmpDir "${OUTPUT_PATH}" "${TMPDIR}/${PACKAGE_TOP_DIR}bin/${OUTPUT_BASENAME}" 0755
 
 
 # Generate tar file
 cd "${TOP}"
-rm -f ${CND_DISTDIR}/${CND_CONF}/package/20180213adasdvr2dir.x.tar
+rm -f ${CND_DISTDIR}/${CND_CONF}/package/pcbpic12f1572.x.tar
 cd ${TMPDIR}
-tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/20180213adasdvr2dir.x.tar *
+tar -vcf ../../../../${CND_DISTDIR}/${CND_CONF}/package/pcbpic12f1572.x.tar *
 checkReturnCode
 
 # Cleanup

@@ -61,30 +61,46 @@ void interrupt InterruptHandlerLow ()
        cUART_char = RCREG; // read new data into variable
     }
     
-    
+  if(GPS_out==0){  
     if( cUART_char == '$' )
     {
         GPS_flag= 0;
         GPS_out= 0;
-        GPS[GPS_flag++]= '$';
+        GPS[GPS_flag]= '$';
+        GPS_flag = GPS_flag +1;
     }
     else if( GPS_flag > 0 )
     {
         test=1;
-        GPS[GPS_flag++]= cUART_char;
-        
-        GPS_out= 1;
+        GPS[GPS_flag]= cUART_char;
+     
+        if(GPS[GPS_flag]==0x0A)
+            GPS_out= 1;  
+        GPS_flag = GPS_flag +1;
     }
     else
         ;
+    
+    if( GPS_flag==6 )
+    {
+        if( (GPS[5]=='C') || (GPS[5]=='A') )
+            ;
+        else
+        {
+            GPS_flag= 0;
+            GPS_out= 0;
+        }
+    
+    }
 
+  }
   }
 }
 
 
 void main(void)
 {
-    unsigned char i= 0;
+    unsigned char i= 0, j=0, k=0;
     
     __delay_ms(100); 
     
@@ -110,17 +126,45 @@ void main(void)
             for(i=0; i < 100;i++)
             {
                 putch(GPS[i]);
-                if(GPS[i+1]==0)
+              //  if(GPS[i+1]==0)
+                    if(GPS[i]==0x0A)
                     break;
             }
- 
+            
+            if(i<10)
+               __delay_ms(19); //j= 1;
+            
+            if( (i>=10) && (i<20))
+               __delay_ms(18); //j= 2;
+            
+            if( (i>=20) && (i<30))
+               __delay_ms(17); //j= 3;
+            
+            if( (i>=30) && (i<40))
+               __delay_ms(16); //j= 4;
+            
+            if( (i>=40) && (i<50))
+               __delay_ms(15); //j= 5;
+            
+            if( (i>=50) && (i<60))
+               __delay_ms(14); //j= 6;
+            
+            if( (i>=60) && (i<70))
+               __delay_ms(13); //j= 7;
+            
+            if( (i>=70) && (i<80))
+               __delay_ms(12); //j= 8;
+            
+            if( (i>=80) && (i<100))
+               __delay_ms(11);//j= 9;
+            
             for(i=0; i < 100;i++)
                 GPS[i]= 0;
 
             GPS_flag = 0;
             GPS_out = 0;
-            
-            __delay_ms(12); 
+            //k= 20-j;
+            //__delay_ms(k); 
         }
         else
            __delay_ms(20);  
@@ -217,8 +261,8 @@ void Stop_turning_LR(){
 
 void checkFrequencyRange(float lowValue, float highValue, int sensorVal)
 {
-  float countForHighValue = ((1 / highValue) * 1000 / 20);
-  float countForLowValue = ((1/ lowValue) * 1000 / 20);
+  float countForHighValue = 33;//((1 / highValue) * 1000 / 20);
+  float countForLowValue = 83;//((1/ lowValue) * 1000 / 20);
 
   // Count
   if (sensorVal == 0)

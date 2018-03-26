@@ -1,0 +1,22 @@
+---- LED_A5 Matches (1 in 1 files) ----
+Main.c:20:#define LED_A5          PORTAbits.RA5
+---- g_Direction Matches (6 in 1 files) ----
+Main.c:21:#define g_Direction         PORTAbits.RA4
+Main.c:129:        if( g_Direction == 0)
+Main.c:187:    if( g_Direction == 1){ 
+Main.c:193:	   if( g_Direction == 0){
+Main.c:284:      //putch(g_Direction);
+Main.c:293:      //putch(g_Direction);
+---- RGB_RX_ANSELbit Matches (4 in 2 files) ----
+RGBChroma.c:243:    uint8_t lastRXANSEL     = RGB_RX_ANSELbit;
+RGBChroma.c:246:    RGB_RX_ANSELbit     = 0;            // configure as digital
+RGBChroma.c:256:    RGB_RX_ANSELbit     = lastRXANSEL;  // restore ANSEL configuration
+RGBChroma.h:69:#define RGB_RX_ANSELbit ANSELAbits.ANSA1
+---- USBSignalling Matches (2 in 2 files) ----
+RGBChroma.c:239:uint8_t USBSignalling(void)
+RGBChroma.h:84:uint8_t USBSignalling(void);        // test RX line for USB signal
+---- RGB_RX_ANSELbit Matches (4 in 2 files) ----
+RGBChroma.c:243:    uint8_t lastRXANSEL     = RGB_RX_ANSELbit;
+RGBChroma.c:246:    RGB_RX_ANSELbit     = 0;            // configure as digital
+RGBChroma.c:256:    RGB_RX_ANSELbit     = lastRXANSEL;  // restore ANSEL configuration
+RGBChroma.h:69:#define RGB_RX_ANSELbit ANSELAbits.ANSA1

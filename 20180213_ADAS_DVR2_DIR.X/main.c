@@ -26,230 +26,116 @@
 
   //  void interrupt  ISR                 (void);
 
-#define SIZE 256 // unit: byte 
-#define START_POINT 0
-    
-// Global variable 
-unsigned char initFlag = 0;
-unsigned char counter = 0;
-int sensorVal_1 = 0;
+unsigned char Flow_Init = 0;
+unsigned char counter= 0;
+int sensorVal_1= 0;
 float lowValueOfFrequency = 0.6; // unit: Hz
 float highValueOfFrequency = 1.5; // unit: Hz
-
-/*
-unsigned char Period[3] = {0, 0, 0};
-unsigned char Pos[2] = {0, 0};
-unsigned char Neg[2] = {0, 0};
-*/
-unsigned char tempPositiveVal = 0;
-unsigned char tempNegativeVal = 0;
-unsigned char positiveVal = 0;
-unsigned char negativeVal = 0;
-
-unsigned char index = 0, outputCount = 0;
-int rIndex = START_POINT, rHead = START_POINT;
-int wIndex = START_POINT, wHead = START_POINT;
-unsigned char buffer[SIZE] = {0};
-
-// Method Prototype 
+  
+unsigned char Period[3]= {0, 0, 0};
+unsigned char Pos[2]= {0, 0};
+unsigned char Neg[2]= {0, 0};
 void checkFrequencyRange(float , float , int);
 
-/* GPS Format 
- $GP GGA 
- $GP GLL 
- $GP GSA 
- $GP GSV 
- $GP MSS 
- $GP RMC 
- $GP VTG 
- $GP ZDA 
- */
+unsigned char GPS_flag= 0, GPS_out= 0;
+unsigned char GPS[100]={0};
+unsigned char test=0;
+
+
 void interrupt InterruptHandlerLow ()
 {
-    unsigned char cUART_char = 0;
-
-    if (PIR1bits.RCIF == 1) // is interrupt occured by EUSART receive?,
-    {                               // then RCREG is full we have new data (cleared when RCREG is read)
-                               
-        // if(RCSTA&0x06) //more efficient way than following commented method to check for reception error
-        if (RCSTAbits.FERR == 1 || RCSTAbits.OERR == 1)
-        {
-            RCSTAbits.CREN = 0;    //Overrun error (can be cleared by clearing bit CREN)
-            cUART_char = RCREG;    //clear Framing error
-            RCSTAbits.CREN = 1;
-        }
-        else
-        {
-            cUART_char = RCREG; // read new data into variable
-        }
-        
-        // {LeonHuang20180313+ [GPS Data filter] 
-        
-        // wHead, outputCount need to lock
-        
-        // Buffer is full 
-        if ((rHead + rIndex) % SIZE == wHead)
-        {
-            rIndex = 0;
-            buffer[rHead] = 0;
-            return;
-        }
-        
-        // Head of GPS
-        if (cUART_char == '$')
-        {
-            rIndex = 0;
-            buffer(rHead) = cUART_char;
-            
-            
-            rIndex++;
-            return;
-        }
-        
-        // {GPS Data Filter+ 
-        int offset = 0;
-        offset = rIndex - rHead; // 1 - 254 = -253, or 3 - 0 = 3 
-        if (buffer[rHead] == '$' && (offset == 3 || offset == -253) && cUART_char == 'V') // $GPVTG,
-        {
-            buffer[rHead] = 0;
-            rIndex = rHead;
-            return;
-        }
-        else if (buffer[rHead] == '$' && (offset == 3 || offset == -253) && cUART_char == 'Z')  // $GPZDA
-        {
-            buffer[rHead] = 0;
-            rIndex = rHead;
-            return;
-        }
-        else if (buffer[rHead] == '$' && (offset == 3 || offset == -253) && cUART_char == 'M')  // $GPMSS
-        {
-            buffer[rHead] = 0;
-            rIndex = rHead;
-            return;
-        }
-        else if (buffer[rHead] == '$' && (offset == 3 || offset == -253) && cUART_char == 'S') // $GPGSA, $GPGSV,
-        {
-            buffer[rHead] = 0;
-            rIndex = rHead;
-            return;
-        }
-        else if (buffer[rHead] == '$' && (offset == 3 || offset == -253) && cUART_char == 'L') // $GPGLL
-        {
-            buffer[rHead] = 0;
-            rIndex = rHead;
-            return;
-        }
-        else if (buffer[rHead] == '$') // $GPGGA, $GPRMC,     We want 
-        {
-            buffer[(rHead + rIndex) % SIZE] = cUART_char;
-            
-            //  End of GPS 
-            if (cUART_char == 0x0A) // Optimization
-            {
-                outputCount++;
-                rHead = (rHead + rIndex + 1) % SIZE;
-                rIndex = 0;
-                return;
-            }
-            
-            rIndex++;
-        }
-        else
-        {
-            // do nothing 
-        }
-        // GPS Data Filter-} 
-        // LeonHuang20180313-}
-               
-        // LeonHuang20180313+ [ Original code, hot key: Ctrl + / ] 
-//        if (outputFlag == 0)
-//        {  
-//            if (cUART_char == '$' )
-//            {
-//                index = 0;
-//                buffer[index] = '$';
-//                index++;
-//            }
-//            else if (index > 0 )
-//            {
-//                buffer[index] = cUART_char;
-//     
-//                if (buffer[index] == 0x0A) //  new line
-//                    outputFlag = 1;  
-//                index++;
-//            }
-//            else
-//            {}
-//                //; // ?
-//           
-//            if (index == 6) // ,
-//            {
-//                if ((buffer[5] == 'C') || (buffer[5] == 'A'))
-//                {}
-//                else
-//                {
-//                    index = 0;
-//                    outputFlag = 0;
-//                }
-//            }
-//        }
-        // LeonHuang20180313-
+  unsigned char cUART_char= 0;
+  
+  if (PIR1bits.RCIF==1)//is interrupt occured by EUSART receive?,
+                        //then RCREG is full we have new data (cleared when RCREG is read)
+  {
+  // if(RCSTA&0x06) //more efficient way than following commented method to check for reception error
+    if(RCSTAbits.FERR==1 || RCSTAbits.OERR==1 )
+    {
+      RCSTAbits.CREN=0;    //Overrun error (can be cleared by clearing bit CREN)
+      cUART_char=RCREG;    //clear Framing error
+      RCSTAbits.CREN=1;
     }
+    else
+    {
+       cUART_char = RCREG; // read new data into variable
+    }
+    
+  if(GPS_out==0){  
+    if( cUART_char == '$' )
+    {
+        GPS_flag= 0;
+        GPS_out= 0;
+        GPS[GPS_flag]= '$';
+        GPS_flag = GPS_flag +1;
+    }
+    else if( GPS_flag > 0 )
+    {
+        test=1;
+        GPS[GPS_flag]= cUART_char;
+     
+        if(GPS[GPS_flag]==0x0A)
+            GPS_out= 1;  
+        GPS_flag = GPS_flag +1;
+    }
+    else
+        ;
+    
+    if( GPS_flag==6 )
+    {
+        if( (GPS[5]=='C') || (GPS[5]=='A') )
+            ;
+        else
+        {
+            GPS_flag= 0;
+            GPS_out= 0;
+        }
+    
+    }
+
+  }
+  }
 }
+
 
 void main(void)
 {
-    unsigned char i = 0;
+    unsigned char i= 0, j=0, k=0;
     
     __delay_ms(100); 
     
     Example_System_Init();    
-    EUSARTInit();
+	EUSARTInit();
             
     //TMR2ON =1;
-    // INTCONbits.GIE = 1;             // Initialization complete. Begin servicing interrupts.
+   // INTCONbits.GIE = 1;             // Initialization complete. Begin servicing interrupts.
 
-    // Initial Information
-    if (initFlag == 0)
-    {
-        __delay_ms(1000);  
-        initFlag = 1;
-    }
+      // Initial Information
+  if (Flow_Init == 0)
+  {
+    __delay_ms(1000);  
+    Flow_Init = 1;
+  }
 
-    while (1)
-    {
-        // {LeonHuang20180313+ [Write GPS data] 
-        //  [wHead], [outputCount] need to lock
-        while (outputCount > 0) // Have a completed GPS data in buffer  
+	while(1)
+	{
+
+        if( GPS_out == 1)
         {
-            putch(buffer[(wHead + wIndex) % SIZE]);
             
-            //  End of GPS data 
-            if (buffer[(wHead + wIndex) % SIZE] == 0x0A)
+            for(i=0; i < 100;i++)
             {
-                outputCount--;
-                wHead = (wHead + wIndex + 1) % SIZE; // new GPS data
-                wIndex = -1; // milestone 
-            }
-            
-            wIndex++;
-        }
-        // LeonHuang20180313-}
-        
-        if (outputCount == 1)
-        {
-            for (i = 0; i < 100; i++)
-            {
-                putch(buffer[i]);
-                    if (buffer[i] == 0x0A)
+                putch(GPS[i]);
+              //  if(GPS[i+1]==0)
+                    if(GPS[i]==0x0A)
                     break;
             }
             
-            if (i<10)
-                __delay_ms(19); // j= 1;
+            if(i<10)
+               __delay_ms(19); //j= 1;
             
-            if ((i >= 10) && ( i < 20))
-                __delay_ms(18); // j= 2;
+            if( (i>=10) && (i<20))
+               __delay_ms(18); //j= 2;
             
             if( (i>=20) && (i<30))
                __delay_ms(17); //j= 3;
@@ -272,24 +158,25 @@ void main(void)
             if( (i>=80) && (i<100))
                __delay_ms(11);//j= 9;
             
-            for (i = 0; i < 100; i++)
-                buffer[i]= 0;
+            for(i=0; i < 100;i++)
+                GPS[i]= 0;
 
-            index = 0;
-            outputCount = 0;
+            GPS_flag = 0;
+            GPS_out = 0;
+            //k= 20-j;
+            //__delay_ms(k); 
         }
         else
-        {
-            __delay_ms(20);  
-        }
-            
-        if ( g_Direction == 0)
-            sensorVal_1 = 0;    
+           __delay_ms(20);  
+         
+         
+        if( g_Direction == 0)
+            sensorVal_1 =0;    
         else
-            sensorVal_1 = 1;
-        
+            sensorVal_1 =1;
         checkFrequencyRange(lowValueOfFrequency, highValueOfFrequency, sensorVal_1); 
-    }
+        
+}
 }
 //================================================================================================
 //  _____                           _        ____            _                   ___       _ _   
@@ -374,68 +261,84 @@ void Stop_turning_LR(){
 
 void checkFrequencyRange(float lowValue, float highValue, int sensorVal)
 {
-    // Optimization
-    float lowerBound = 33; //  ((1 / highValue) * 1000 / 20);
-    float upperBound = 83; // ((1 / lowValue) * 1000 / 20);
+  float countForHighValue = 33;//((1 / highValue) * 1000 / 20);
+  float countForLowValue = 83;//((1/ lowValue) * 1000 / 20);
 
-    // Count
-    if (sensorVal == 0)
+  // Count
+  if (sensorVal == 0)
+  {
+    Neg[0] = Neg[0] + 1;
+    if (Pos[0] > 0)
+      Pos[1] = 1;     
+  }
+  else
+  {
+    Pos[0] = Pos[0] + 1;
+    if (Neg[0] > 0)
+      Neg[1] = 1;
+  }
+
+  // Clear data
+  if (Pos[0] > countForLowValue)
+  {
+    Pos[0]= 0;
+    Period[0]= 0; 
+  }
+  if (Neg[0] > countForLowValue)
+  {
+    Neg[0]= 0;
+    Period[1]= 0; 
+  }
+
+  // Record count information for HIGH
+  if (Pos[1] == 1)
+  {
+//    Serial.print('%');
+//    Serial.println(Pos[0], DEC);
+    Period[0] = Pos[0]; 
+    Pos[0] = 0;
+    Pos[1] = 0; 
+  }
+
+  // Record count information for LOW
+  if (Neg[1] == 1)
+  {
+//    Serial.print('%');
+//    Serial.println(Neg[0], DEC);
+    Period[1] = Neg[0];
+    Neg[0] = 0;
+    Neg[1] = 0;
+  }
+
+  // Check frequency range
+  counter++;
+  if (counter >= 10) // 200 ms
+  {
+    Period[2] = Period[0] + Period[1];
+
+
+   // if ((Period[2] >= 33) && (Period[2] <= 83))
+    
+    if ((Period[2] >= countForHighValue) && (Period[2] <= countForLowValue))
     {
-        tempNegativeVal += 1;
-
-        if (tempPositiveVal > 0)
-        {
-            positiveVal = tempPositiveVal;
-            tempPositiveVal = 0;
-        }
+      putch('%');
+      putch('0');
+ putch('\r');
+  putch('\n');
+      //putch(g_Direction);
     }
     else
     {
-        tempPositiveVal += 1;
-    
-        if (tempNegativeVal > 0) 
-        {
-            negativeVal = tempNegativeVal;
-            tempNegativeVal = 0;
-        }
-    }
-    
-    // Clear data
-    if (tempNegativeVal > upperBound) // > 83 count
-    {
-        tempNegativeVal = 0;
-        negativeVal = 0;
-    }
-    if (tempPositiveVal > upperBound) // > 83 count
-    {
-        tempPositiveVal = 0;
-        positiveVal = 0;
+      putch('%');
+      putch('1');   
+  putch('\r');
+  putch('\n');
+ 
+      //putch(g_Direction);
     }
 
-    // Check once per 200 ms
-    counter++;
-    if (counter >= 10) // 200 ms
-    {
-        unsigned char sum = negativeVal + positiveVal;
-        if ((sum >= lowerBound) && (sum <= upperBound))
-        {
-            putch('%');
-            putch('0');
-            putch('\r');
-            putch('\n');
-            //putch(g_Direction);
-        }
-        else
-        {
-            putch('%');
-            putch('1');   
-            putch('\r');
-            putch('\n');
-            //putch(g_Direction);
-        }
-
-        counter = 0;
-    }
+    counter = 0;
+  }
 }
 /// @endcond
 

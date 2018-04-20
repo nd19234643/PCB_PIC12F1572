@@ -1,12 +1,12 @@
 /*************************************************************************
- *  © 2012 Microchip Technology Inc.                                       
+ *   2012 Microchip Technology Inc.                                       
  *  
  *  Project Name:    AN1562 - RGB LED Color Mixing Application Note
  *  FileName:        RGBChroma.h
  *  Dependencies:    
- *  Processor:       See documentation for supported PIC® microcontrollers 
+ *  Processor:       See documentation for supported PIC microcontrollers 
  *  Compiler:        HI-TECH Ver. 9.81 or later
- *  IDE:             MPLAB® IDE v8.50 (or later) or MPLAB® X                        
+ *  IDE:             MPLAB IDE v8.50 (or later) or MPLAB X                        
  *  Hardware:         
  *  Company:         
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,13 +52,11 @@
 /** @file   RGBChroma.h
 *   @brief  Main RGBChroma header file
 */
-
 #ifndef RGBCHROMA_H
 #define	RGBCHROMA_H
 
 #include <stdint.h>
 #include <stdbool.h>
-
 
 #ifdef	__cplusplus
 extern "C" {
@@ -76,17 +74,11 @@ extern "C" {
 */
 // _12F1572
 
-
-
-
-
-void EUSARTInit(void);              // set up pins and peripherals.
+void initEUSART(void);              // set up pins and peripherals.
 void EUSARTShutdown(void);          // turn off EUSART
 //uint8_t USBSignalling(void);        // test RX line for USB signal
 uint8_t receiveRGB(void);           // receives color data from EUSART
 void putch(char data);              // directs STDOUT to UART.
-
-
 
 
 #ifdef	__cplusplus

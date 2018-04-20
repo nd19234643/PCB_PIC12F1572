@@ -1,12 +1,12 @@
 /*************************************************************************
- *  � 2014 Microchip Technology Inc.                                       
+ *   2014 Microchip Technology Inc.                                       
  *  
  *  Project Name:    RGBbadge Chroma
  *  FileName:        RGBChroma.c
  *  Dependencies:    configbits.h
  *  Processor:       PIC12F1572
  *  Compiler:        XC8 v1.30
- *  IDE:             MPLAB� X IDE v2.05 or later
+ *  IDE:             MPLAB X IDE v2.05 or later
  *  Hardware:        RGBbadge demonstration board 
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *  Description:     Main routine
@@ -64,8 +64,6 @@
 #include "RGBChroma.h"
 //#include "RGBSlider.h"
 
-
-
 //#define ASCII_DATA
 #if defined(ASCII_DATA)
     #define RXDATASIZE      12  // 3 16-bit ASCII values for RED, GRN, BLU
@@ -74,54 +72,77 @@
 #endif // ASCII_DATA
 
 #define _XTAL_FREQ   16000000  //Used by the XC8 delay_ms(x) macro
-#define INTER_CHARACTER_TIMEOUT 4   // greater than (4) 100 ms ticks = 500 ms
-#define ASCII_ACK               0x06    // keep alive reponse from PC
+#define SETBAUD16H(bps)     ((_XTAL_FREQ)/( 4L * (bps)))   // BRGH = 1, BRG16 = 1
+#define SETBAUD16(bps)      ((_XTAL_FREQ)/(16L * (bps)))   // BRGH = 0, BRG16 = 1
+#define SETBAUD8H(bps)      ((_XTAL_FREQ)/(16L * (bps)))   // BRGH = 1, BRG16 = 0
+#define SETBAUD8(bps)       ((_XTAL_FREQ)/(64L * (bps)))   // BRGH = 0, BRG16 = 0
+#define AUTO_BAUD_RATE_DETECTION // LeonHuang20180419, [Automatic detection and calibration of the baud rate] 
 
+//#define INTER_CHARACTER_TIMEOUT 4   // greater than (4) 100 ms ticks = 500 ms
+//#define ASCII_ACK               0x06    // keep alive reponse from PC
 
-uint8_t   rxBytes[RXDATASIZE] = { 0 };
+//uint8_t   rxBytes[RXDATASIZE] = { 0 };
 
-
-void EUSARTInit()
+/*** Reference PIC12F1571-2 Data Sheet, Chapter 21.0 - EUSART ***/
+// Enhanced Universal Synchronous Asynchronous Receiver Transmitter (EUSART)
+// When the receiver or transmitter section is not enabled, then the corresponding RX or TX pin may be used for general purpose input and output (GPIO).
+void initEUSART()
 {
-
     // ================
     // Configure EUSART
     // ================
-    // when BRG16 == 1, and BRGH == 1
-    // baud                     = FOSC /(4 * (n+1))
-    // (4 * baud) / FOSC        = 1 / (n+1)
-    // FOSC / (4 * baud)           = n + 1
-    // ( FOSC / (4 * baud)) - 1    = n
+    // BRGH = 1, BRG16 = 1, Fosc = 16 MHz, Desired Baud Rate = 9600 (14400, 19200, 38400, 57600, 115200) 
+    // Desired Baud Rate = Fosc / 4 (SPBRG + 1)
+    // SPBRG = (Fosc / 4 * Desired Baud Rate) - 1
+    // SPBRG = 16000000 / 4 * 9600 - 1 = 415.66
 
-// TODO: move this
-#define SETBAUD16H(bps)     ((_XTAL_FREQ)/( 4L * (bps)))   // BRGH=1, BRG16=1
-#define SETBAUD16(bps)      ((_XTAL_FREQ)/(16L * (bps)))   // BRGH=0, BRG16=1
-#define SETBAUD8H(bps)      ((_XTAL_FREQ)/(16L * (bps)))   // BRGH=1, BRG16=0
-#define SETBAUD8(bps)       ((_XTAL_FREQ)/(64L * (bps)))   // BRGH=0, BRG16=0
-    APFCON0bits.TXCKSEL  = 0;               //TX==>RA0 //Tsunghua 20180213
-    APFCON0bits.RXDTSEL  = 1;               //RX==>RA5 //Tsunghua 20180213
-    TRISAbits.TRISA5    = 1;                // set Rx to input //Tsunghua 20180213
-    TRISAbits.TRISA0    = 0;                // Make UART TX pin output
-    BAUDCONbits.BRG16   = 1;                // 16-bit baud rate generator
-    TXSTAbits.BRGH      = 1;                // high speed baud
-    SPBRG               = SETBAUD16H(9600); // set serial baud rate 9600 - FOSC=16MHz
-    TXSTAbits.TXEN      = 1;                // enable serial transmissions.
-    RCSTAbits.CREN      = 1;                // enable reception.
-    RCSTAbits.SPEN      = 1;                // turn on serial port.
-    TXSTAbits.SYNC      = 0;                //0 = Asynchronous mode
-
-    PIE1bits.RCIE       = 1;                // 1 = Enables the EUSART receive interrupt
-    INTCONbits.GIE      = 1;                // enable interrupts
-    INTCONbits.PEIE     = 1;    
-
+    unsigned char temp;
     
-} // end EUSARTInit()
+    // steer specific peripheral input and output functions between different pins
+    APFCON0bits.TXCKSEL  = 0;               // TX/CK function is on RA0
+    APFCON0bits.RXDTSEL  = 1;               // RX/DT function is on RA5
+    
+    // PORTA pin is input, output
+    TRISAbits.TRISA5    = 1;                // configure RA5 as input
+    TRISAbits.TRISA0    = 0;                // configure RA0 as output
+    
+    /*
+        The operation of the EUSART module is controlled through three registers:
+        • Transmit Status and Control (TXSTA)
+        • Receive Status and Control (RCSTA)
+        • Baud Rate Control (BAUDCON)
+     */
+    BAUDCONbits.BRG16   = 1;                // 16-bit Baud Rate Generator is used
+    TXSTAbits.BRGH      = 1;                // High speed Baud Rate
 
-
+    TXSTAbits.SYNC      = 0;                // EUSART Mode : Asynchronous mode
+    RCSTAbits.SPEN      = 1;                // Serial port is enabled (configures RX/DT and TX/CK pins as serial port pins)
+    TXSTAbits.TXEN      = 1;                // Transmit is enabled
+    RCSTAbits.CREN      = 1;                // Enables receiver
+    
+    // {LeonHuang20180419+ [Automatic detection and calibration of the baud rate] 
+#ifdef AUTO_BAUD_RATE_DETECTION
+AUTOBAUD:
+    BAUDCONbits.ABDEN   = 1;                // Starts the auto-baud calibration sequence
+    while(!PIR1bits.RCIF);                  // Waiting for USART incoming U
+    temp = RCREG;                           // Must read RCREG to clear RCIF
+    
+    while(!PIR1bits.RCIF);                  // Waiting for USART incoming byte 'U' (for real this time)
+    temp = RCREG;
+    if (temp != 'U')
+        goto AUTOBAUD;
+#else
+    SPBRG               = SETBAUD16H(9600); // Set Baud Rate 9600
+#endif
+    // LeonHuang20180419-}
+    
+    PIE1bits.RCIE       = 1;                // Enables the USART receive interrupt
+    INTCONbits.GIE      = 1;                // Enables all active interrupts
+    INTCONbits.PEIE     = 1;                // Enables all active peripheral interrupts
+}
 
 void EUSARTShutdown()
 {
-
     // ================
     // Configure EUSART
     // ================
@@ -129,8 +150,7 @@ void EUSARTShutdown()
     PIR1bits.RCIF       = 0;                // make sure receive interrupt flag is clear.
     TRISAbits.TRISA1    = 0;                // return Rx to an output for mTouch
 
-} // end EUSARTShutDown()
-
+}
 
 
 uint8_t receiveRGB()
@@ -266,9 +286,11 @@ uint8_t USBSignalling(void)
 // this directs printf output to the serial port.
 void putch(char data) 
 {
-    if( 1 == RCSTAbits.SPEN )
+    if (1 == RCSTAbits.SPEN) // Serial Port is enable
     {
-        while( ! TXIF) continue;
+        // The TXIF flag is set when the TXEN enable bit is set.
+        // The TXIF flag bit will be set whenever the TXREG is empty
+        while (!TXIF) continue;
         TXREG = data;
     }
 }

@@ -1,10 +1,10 @@
 
 # 1 "RGBChroma.c"
 
-# 4 "/Applications/microchip/xc8/v1.45/include/__size_t.h"
+# 4 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\__size_t.h"
 typedef unsigned size_t;
 
-# 7 "/Applications/microchip/xc8/v1.45/include/stdarg.h"
+# 7 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdarg.h"
 typedef void * va_list[1];
 
 #pragma intrinsic(__va_start)
@@ -13,17 +13,17 @@ extern void * __va_start(void);
 #pragma intrinsic(__va_arg)
 extern void * __va_arg(void *, ...);
 
-# 43 "/Applications/microchip/xc8/v1.45/include/stdio.h"
+# 43 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdio.h"
 struct __prbuf
 {
 char * ptr;
 void (* func)(char);
 };
 
-# 29 "/Applications/microchip/xc8/v1.45/include/errno.h"
+# 29 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\errno.h"
 extern int errno;
 
-# 12 "/Applications/microchip/xc8/v1.45/include/conio.h"
+# 12 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\conio.h"
 extern void init_uart(void);
 
 extern char getch(void);
@@ -37,7 +37,7 @@ extern __bit kbhit(void);
 extern char * cgets(char *);
 extern void cputs(const char *);
 
-# 88 "/Applications/microchip/xc8/v1.45/include/stdio.h"
+# 88 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdio.h"
 extern int cprintf(char *, ...);
 #pragma printf_check(cprintf)
 
@@ -64,7 +64,7 @@ extern int vsscanf(const char *, const char *, va_list) __attribute__((unsupport
 extern int sprintf(char *, const char *, ...);
 extern int printf(const char *, ...);
 
-# 7 "/Applications/microchip/xc8/v1.45/include/stdlib.h"
+# 7 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdlib.h"
 typedef unsigned short wchar_t;
 
 # 15
@@ -113,11 +113,11 @@ extern void free(void *);
 extern void * realloc(void *, size_t);
 
 
-# 13 "/Applications/microchip/xc8/v1.45/include/xc8debug.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\xc8debug.h"
 #pragma intrinsic(__builtin_software_breakpoint)
 extern void __builtin_software_breakpoint(void);
 
-# 86 "/Applications/microchip/xc8/v1.45/include/stdlib.h"
+# 86 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdlib.h"
 extern int atexit(void (*)(void));
 extern char * getenv(const char *);
 extern char ** environ;
@@ -138,7 +138,7 @@ extern char * ultoa(char * buf, unsigned long val, int base);
 
 extern char * ftoa(float f, int * status);
 
-# 13 "/Applications/microchip/xc8/v1.45/include/stdint.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdint.h"
 typedef signed char int8_t;
 
 # 20
@@ -228,15 +228,15 @@ typedef int16_t intptr_t;
 
 typedef uint16_t uintptr_t;
 
-# 12 "/Applications/microchip/xc8/v1.45/include/stdbool.h"
+# 12 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdbool.h"
 typedef unsigned char bool;
 
-# 26 "/Applications/microchip/xc8/v1.45/include/htc.h"
+# 26 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
 
 extern double __fpnormalize(double);
 
-# 50 "/Applications/microchip/xc8/v1.45/include/pic12f1572.h"
+# 50 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic12f1572.h"
 extern volatile unsigned char INDF0 @ 0x000;
 
 asm("INDF0 equ 00h");
@@ -4716,7 +4716,7 @@ extern volatile __bit nTO @ (((unsigned) &STATUS)*8) + 4;
 extern volatile __bit nWPUEN @ (((unsigned) &OPTION_REG)*8) + 7;
 
 
-# 28 "/Applications/microchip/xc8/v1.45/include/pic.h"
+# 28 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic.h"
 #pragma intrinsic(__nop)
 extern void __nop(void);
 
@@ -4738,45 +4738,57 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 
-# 83 "RGBChroma.h"
-void EUSARTInit(void);
+# 77 "RGBChroma.h"
+void initEUSART(void);
 void EUSARTShutdown(void);
 
 uint8_t receiveRGB(void);
 void putch(char data);
 
-# 81 "RGBChroma.c"
-uint8_t rxBytes[6] = { 0 };
-
-
-void EUSARTInit()
+# 89 "RGBChroma.c"
+void initEUSART()
 {
 
-# 101
+# 99
+unsigned char temp;
+
+
 APFCON0bits.TXCKSEL = 0;
 APFCON0bits.RXDTSEL = 1;
+
+
 TRISAbits.TRISA5 = 1;
 TRISAbits.TRISA0 = 0;
+
+# 115
 BAUDCONbits.BRG16 = 1;
 TXSTAbits.BRGH = 1;
-SPBRG = ((16000000)/( 4L * (9600)));
+
+TXSTAbits.SYNC = 0;
+RCSTAbits.SPEN = 1;
 TXSTAbits.TXEN = 1;
 RCSTAbits.CREN = 1;
-RCSTAbits.SPEN = 1;
-TXSTAbits.SYNC = 0;
 
+
+
+AUTOBAUD:
+BAUDCONbits.ABDEN = 1;
+while(!PIR1bits.RCIF);
+temp = RCREG;
+
+while(!PIR1bits.RCIF);
+temp = RCREG;
+if (temp != 'U')
+goto AUTOBAUD;
+
+# 139
 PIE1bits.RCIE = 1;
 INTCONbits.GIE = 1;
 INTCONbits.PEIE = 1;
-
-
 }
-
-
 
 void EUSARTShutdown()
 {
-
 
 
 
@@ -4787,19 +4799,20 @@ TRISAbits.TRISA1 = 0;
 }
 
 
-
 uint8_t receiveRGB()
 {
 
-# 238
+# 258
 }
 
-# 267
+# 287
 void putch(char data)
 {
-if( 1 == RCSTAbits.SPEN )
+if (1 == RCSTAbits.SPEN)
 {
-while( ! TXIF) continue;
+
+
+while (!TXIF) continue;
 TXREG = data;
 }
 }

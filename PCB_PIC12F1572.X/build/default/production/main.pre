@@ -1,17 +1,17 @@
 
 # 1 "main.c"
 
-# 26 "/Applications/microchip/xc8/v1.45/include/htc.h"
+# 26 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
 
 extern double __fpnormalize(double);
 
 
-# 13 "/Applications/microchip/xc8/v1.45/include/xc8debug.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\xc8debug.h"
 #pragma intrinsic(__builtin_software_breakpoint)
 extern void __builtin_software_breakpoint(void);
 
-# 50 "/Applications/microchip/xc8/v1.45/include/pic12f1572.h"
+# 50 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic12f1572.h"
 extern volatile unsigned char INDF0 @ 0x000;
 
 asm("INDF0 equ 00h");
@@ -4491,7 +4491,7 @@ extern volatile __bit nTO @ (((unsigned) &STATUS)*8) + 4;
 extern volatile __bit nWPUEN @ (((unsigned) &OPTION_REG)*8) + 7;
 
 
-# 28 "/Applications/microchip/xc8/v1.45/include/pic.h"
+# 28 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic.h"
 #pragma intrinsic(__nop)
 extern void __nop(void);
 
@@ -4513,7 +4513,7 @@ extern __bank0 unsigned char __resetbits;
 extern __bank0 __bit __powerdown;
 extern __bank0 __bit __timeout;
 
-# 13 "/Applications/microchip/xc8/v1.45/include/stdint.h"
+# 13 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdint.h"
 typedef signed char int8_t;
 
 # 20
@@ -4603,11 +4603,11 @@ typedef int16_t intptr_t;
 
 typedef uint16_t uintptr_t;
 
-# 12 "/Applications/microchip/xc8/v1.45/include/stdbool.h"
+# 12 "C:\Program Files (x86)\Microchip\xc8\v1.45\include\stdbool.h"
 typedef unsigned char bool;
 
-# 83 "RGBChroma.h"
-void EUSARTInit(void);
+# 77 "RGBChroma.h"
+void initEUSART(void);
 void EUSARTShutdown(void);
 
 uint8_t receiveRGB(void);
@@ -4629,10 +4629,10 @@ void putch(char data);
 #pragma config BORV = LO
 #pragma config LVP = OFF
 
-# 24
+# 26
 void Example_System_Init (void);
 
-# 46
+# 45
 unsigned char tempPositiveVal = 0, tempNegativeVal = 0;
 unsigned char positiveVal = 0, negativeVal = 0;
 
@@ -4641,13 +4641,13 @@ unsigned char outputCount = 0, freqCount = 0;
 short int timerCount = 0;
 short int rIndex = 0, rHead = 0;
 short int wIndex = 0, wHead = 0;
-unsigned char buffer[208] = {0};
+unsigned char buffer[214] = {0};
 
 
 void initTimer0();
 void checkFrequencyRange();
 
-# 71
+# 70
 void interrupt InterruptHandlerLow ()
 {
 unsigned char cUART_char = 0;
@@ -4675,7 +4675,7 @@ buffer[rHead] = 0;
 return;
 }
 
-if ((rHead + rIndex + 1) % 208 == wHead)
+if ((rHead + rIndex + 1) % 214 == wHead)
 {
 rIndex = 0;
 buffer[rHead] = 0;
@@ -4724,13 +4724,13 @@ return;
 }
 else if (buffer[rHead] == '$')
 {
-buffer[(rHead + rIndex) % 208] = cUART_char;
+buffer[(rHead + rIndex) % 214] = cUART_char;
 
 
 if (cUART_char == 0x0A)
 {
 outputCount++;
-rHead = (rHead + rIndex + 1) % 208;
+rHead = (rHead + rIndex + 1) % 214;
 rIndex = 0;
 return;
 }
@@ -4742,7 +4742,7 @@ else
 
 }
 
-# 200
+# 199
 }
 }
 
@@ -4750,15 +4750,13 @@ void main(void)
 {
 
 
-_delay((unsigned long)((100)*(16000000/4000.0)));
-
 Example_System_Init();
-EUSARTInit();
+initEUSART();
 
-# 216
+# 213
 initTimer0();
 
-# 235
+# 232
 _delay((unsigned long)((100)*(16000000/4000.0)));
 
 while (1)
@@ -4781,14 +4779,14 @@ TMR0IF = 0;
 
 while (outputCount > 0)
 {
-putch(buffer[(wHead + wIndex) % 208]);
+putch(buffer[(wHead + wIndex) % 214]);
 
 
-if (buffer[(wHead + wIndex) % 208] == 0x0A)
+if (buffer[(wHead + wIndex) % 214] == 0x0A)
 {
 highestPriority = 1;
 outputCount--;
-wHead = (wHead + wIndex + 1) % 208;
+wHead = (wHead + wIndex + 1) % 214;
 wIndex = 0;
 highestPriority = 0;
 break;
@@ -4810,25 +4808,24 @@ timerCount = 0;
 TMR0 = 126;
 }
 
-# 342
+# 339
 }
 }
 
-# 353
 void Example_System_Init()
 {
 
-# 360
+
+
 OSCCON = 0b01111000;
 
-# 365
+# 352
 ANSELA = 0b00000000;
 LATA = 0b00110100;
 TRISA = 0b00010000;
-
 }
 
-# 435
+# 413
 void initTimer0()
 {
 TMR0 = 126;

@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-"2189 /Applications/microchip/xc8/v1.45/include/pic12f1572.h
+"2189 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic12f1572.h
 [s S125 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S125 . P1SEL P2SEL TXCKSEL T1GSEL . CWGBSEL CWGASEL RXDTSEL ]
 "2188
@@ -34,8 +34,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S153 . . ]
 "2644
 [v _TXSTAbits `VS153 ~T0 @X0 0 e@414 ]
-"2518
-[v _SPBRG `Vus ~T0 @X0 0 e@411 ]
 "2571
 [s S152 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S152 . RX9D OERR FERR ADDEN CREN SREN RX9 SPEN ]
@@ -44,6 +42,16 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S151 . . ]
 "2582
 [v _RCSTAbits `VS151 ~T0 @X0 0 e@413 ]
+"491
+[s S37 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
+[n S37 . TMR1IF TMR2IF . TXIF RCIF ADIF TMR1GIF ]
+"490
+[u S36 `S37 1 ]
+[n S36 . . ]
+"501
+[v _PIR1bits `VS36 ~T0 @X0 0 e@17 ]
+"2478
+[v _RCREG `Vuc ~T0 @X0 0 e@409 ]
 "976
 [s S65 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
 [n S65 . TMR1IE TMR2IE . TXIE RCIE ADIE TMR1GIE ]
@@ -63,14 +71,6 @@ Version 3.2 HI-TECH Software Intermediate Code
 [n S30 . . . ]
 "372
 [v _INTCONbits `VS30 ~T0 @X0 0 e@11 ]
-"491
-[s S37 :1 `uc 1 :1 `uc 1 :2 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 :1 `uc 1 ]
-[n S37 . TMR1IF TMR2IF . TXIF RCIF ADIF TMR1GIF ]
-"490
-[u S36 `S37 1 ]
-[n S36 . . ]
-"501
-[v _PIR1bits `VS36 ~T0 @X0 0 e@17 ]
 "9464
 [v _TXIF `Vb ~T0 @X0 0 e@140 ]
 "2498
@@ -188,7 +188,7 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;htc.h: 26: extern const char __xc8_OPTIM_SPEED;
 [; ;htc.h: 28: extern double __fpnormalize(double);
 [; ;pic12f1572.h: 50: extern volatile unsigned char INDF0 @ 0x000;
-"52 /Applications/microchip/xc8/v1.45/include/pic12f1572.h
+"52 C:\Program Files (x86)\Microchip\xc8\v1.45\include\pic12f1572.h
 [; ;pic12f1572.h: 52: asm("INDF0 equ 00h");
 [; <" INDF0 equ 00h ;# ">
 [; ;pic12f1572.h: 55: typedef union {
@@ -3536,138 +3536,163 @@ Version 3.2 HI-TECH Software Intermediate Code
 [; ;pic.h: 193: extern __bank0 unsigned char __resetbits;
 [; ;pic.h: 194: extern __bank0 __bit __powerdown;
 [; ;pic.h: 195: extern __bank0 __bit __timeout;
-[; ;RGBChroma.h: 83: void EUSARTInit(void);
-[; ;RGBChroma.h: 84: void EUSARTShutdown(void);
-[; ;RGBChroma.h: 86: uint8_t receiveRGB(void);
-[; ;RGBChroma.h: 87: void putch(char data);
-"81 RGBChroma.c
-[v _rxBytes `uc ~T0 @X0 -> 6 `i e ]
-[i _rxBytes
-:U ..
--> -> 0 `i `uc
-..
-]
-[; ;RGBChroma.c: 81: uint8_t rxBytes[6] = { 0 };
-"84
-[v _EUSARTInit `(v ~T0 @X0 1 ef ]
-"85
+[; ;RGBChroma.h: 77: void initEUSART(void);
+[; ;RGBChroma.h: 78: void EUSARTShutdown(void);
+[; ;RGBChroma.h: 80: uint8_t receiveRGB(void);
+[; ;RGBChroma.h: 81: void putch(char data);
+"89 RGBChroma.c
+[v _initEUSART `(v ~T0 @X0 1 ef ]
+"90
 {
-[; ;RGBChroma.c: 84: void EUSARTInit()
-[; ;RGBChroma.c: 85: {
-[e :U _EUSARTInit ]
+[; ;RGBChroma.c: 89: void initEUSART()
+[; ;RGBChroma.c: 90: {
+[e :U _initEUSART ]
 [f ]
-[; ;RGBChroma.c: 101: APFCON0bits.TXCKSEL = 0;
-"101
-[e = . . _APFCON0bits 0 2 -> -> 0 `i `uc ]
-[; ;RGBChroma.c: 102: APFCON0bits.RXDTSEL = 1;
+"99
+[v _temp `uc ~T0 @X0 1 a ]
+[; ;RGBChroma.c: 99: unsigned char temp;
+[; ;RGBChroma.c: 102: APFCON0bits.TXCKSEL = 0;
 "102
-[e = . . _APFCON0bits 0 7 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 103: TRISAbits.TRISA5 = 1;
+[e = . . _APFCON0bits 0 2 -> -> 0 `i `uc ]
+[; ;RGBChroma.c: 103: APFCON0bits.RXDTSEL = 1;
 "103
-[e = . . _TRISAbits 0 5 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 104: TRISAbits.TRISA0 = 0;
-"104
-[e = . . _TRISAbits 0 0 -> -> 0 `i `uc ]
-[; ;RGBChroma.c: 105: BAUDCONbits.BRG16 = 1;
-"105
-[e = . . _BAUDCONbits 0 3 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 106: TXSTAbits.BRGH = 1;
+[e = . . _APFCON0bits 0 7 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 106: TRISAbits.TRISA5 = 1;
 "106
-[e = . . _TXSTAbits 0 2 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 107: SPBRG = ((16000000)/( 4L * (9600)));
+[e = . . _TRISAbits 0 5 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 107: TRISAbits.TRISA0 = 0;
 "107
-[e = _SPBRG -> / -> 16000000 `l * -> 4 `l -> -> 9600 `i `l `us ]
-[; ;RGBChroma.c: 108: TXSTAbits.TXEN = 1;
-"108
-[e = . . _TXSTAbits 0 5 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 109: RCSTAbits.CREN = 1;
-"109
-[e = . . _RCSTAbits 0 4 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 110: RCSTAbits.SPEN = 1;
-"110
-[e = . . _RCSTAbits 0 7 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 111: TXSTAbits.SYNC = 0;
-"111
-[e = . . _TXSTAbits 0 4 -> -> 0 `i `uc ]
-[; ;RGBChroma.c: 113: PIE1bits.RCIE = 1;
-"113
-[e = . . _PIE1bits 0 4 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 114: INTCONbits.GIE = 1;
-"114
-[e = . . _INTCONbits 0 7 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 115: INTCONbits.PEIE = 1;
+[e = . . _TRISAbits 0 0 -> -> 0 `i `uc ]
+[; ;RGBChroma.c: 115: BAUDCONbits.BRG16 = 1;
 "115
-[e = . . _INTCONbits 0 6 -> -> 1 `i `uc ]
-[; ;RGBChroma.c: 118: }
+[e = . . _BAUDCONbits 0 3 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 116: TXSTAbits.BRGH = 1;
+"116
+[e = . . _TXSTAbits 0 2 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 118: TXSTAbits.SYNC = 0;
 "118
-[e :UE 439 ]
-}
-"122
-[v _EUSARTShutdown `(v ~T0 @X0 1 ef ]
-"123
-{
-[; ;RGBChroma.c: 122: void EUSARTShutdown()
-[; ;RGBChroma.c: 123: {
-[e :U _EUSARTShutdown ]
-[f ]
-[; ;RGBChroma.c: 128: RCSTAbits.SPEN = 0;
+[e = . . _TXSTAbits 0 4 -> -> 0 `i `uc ]
+[; ;RGBChroma.c: 119: RCSTAbits.SPEN = 1;
+"119
+[e = . . _RCSTAbits 0 7 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 120: TXSTAbits.TXEN = 1;
+"120
+[e = . . _TXSTAbits 0 5 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 121: RCSTAbits.CREN = 1;
+"121
+[e = . . _RCSTAbits 0 4 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 125: AUTOBAUD:
+"125
+[e :U 440 ]
+[; ;RGBChroma.c: 126: BAUDCONbits.ABDEN = 1;
+"126
+[e = . . _BAUDCONbits 0 0 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 127: while(!PIR1bits.RCIF);
+"127
+[e $U 441  ]
+[e :U 442 ]
+[e :U 441 ]
+[e $ ! != -> . . _PIR1bits 0 4 `i -> -> -> 0 `i `Vuc `i 442  ]
+[e :U 443 ]
+[; ;RGBChroma.c: 128: temp = RCREG;
 "128
-[e = . . _RCSTAbits 0 7 -> -> 0 `i `uc ]
-[; ;RGBChroma.c: 129: PIR1bits.RCIF = 0;
-"129
-[e = . . _PIR1bits 0 4 -> -> 0 `i `uc ]
-[; ;RGBChroma.c: 130: TRISAbits.TRISA1 = 0;
+[e = _temp _RCREG ]
+[; ;RGBChroma.c: 130: while(!PIR1bits.RCIF);
 "130
-[e = . . _TRISAbits 0 1 -> -> 0 `i `uc ]
-[; ;RGBChroma.c: 132: }
-"132
-[e :UE 440 ]
-}
-"136
-[v _receiveRGB `(uc ~T0 @X0 1 ef ]
-"137
-{
-[; ;RGBChroma.c: 136: uint8_t receiveRGB()
-[; ;RGBChroma.c: 137: {
-[e :U _receiveRGB ]
-[f ]
-[; ;RGBChroma.c: 238: }
-"238
-[e :UE 441 ]
-}
-"267
-[v _putch `(v ~T0 @X0 1 ef1`uc ]
-"268
-{
-[; ;RGBChroma.c: 267: void putch(char data)
-[; ;RGBChroma.c: 268: {
-[e :U _putch ]
-"267
-[v _data `uc ~T0 @X0 1 r1 ]
-"268
-[f ]
-[; ;RGBChroma.c: 269: if( 1 == RCSTAbits.SPEN )
-"269
-[e $ ! == -> 1 `i -> . . _RCSTAbits 0 7 `i 443  ]
-[; ;RGBChroma.c: 270: {
-"270
-{
-[; ;RGBChroma.c: 271: while( ! TXIF) continue;
-"271
 [e $U 444  ]
 [e :U 445 ]
-[e $U 444  ]
 [e :U 444 ]
-[e $ ! _TXIF 445  ]
+[e $ ! != -> . . _PIR1bits 0 4 `i -> -> -> 0 `i `Vuc `i 445  ]
 [e :U 446 ]
-[; ;RGBChroma.c: 272: TXREG = data;
-"272
-[e = _TXREG _data ]
-"273
+[; ;RGBChroma.c: 131: temp = RCREG;
+"131
+[e = _temp _RCREG ]
+[; ;RGBChroma.c: 132: if (temp != 'U')
+"132
+[e $ ! != -> _temp `ui -> 85 `ui 447  ]
+[; ;RGBChroma.c: 133: goto AUTOBAUD;
+"133
+[e $U 440  ]
+[e :U 447 ]
+[; ;RGBChroma.c: 139: PIE1bits.RCIE = 1;
+"139
+[e = . . _PIE1bits 0 4 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 140: INTCONbits.GIE = 1;
+"140
+[e = . . _INTCONbits 0 7 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 141: INTCONbits.PEIE = 1;
+"141
+[e = . . _INTCONbits 0 6 -> -> 1 `i `uc ]
+[; ;RGBChroma.c: 142: }
+"142
+[e :UE 439 ]
 }
-[e :U 443 ]
-[; ;RGBChroma.c: 273: }
-[; ;RGBChroma.c: 274: }
-"274
-[e :UE 442 ]
+"144
+[v _EUSARTShutdown `(v ~T0 @X0 1 ef ]
+"145
+{
+[; ;RGBChroma.c: 144: void EUSARTShutdown()
+[; ;RGBChroma.c: 145: {
+[e :U _EUSARTShutdown ]
+[f ]
+[; ;RGBChroma.c: 149: RCSTAbits.SPEN = 0;
+"149
+[e = . . _RCSTAbits 0 7 -> -> 0 `i `uc ]
+[; ;RGBChroma.c: 150: PIR1bits.RCIF = 0;
+"150
+[e = . . _PIR1bits 0 4 -> -> 0 `i `uc ]
+[; ;RGBChroma.c: 151: TRISAbits.TRISA1 = 0;
+"151
+[e = . . _TRISAbits 0 1 -> -> 0 `i `uc ]
+[; ;RGBChroma.c: 153: }
+"153
+[e :UE 448 ]
+}
+"156
+[v _receiveRGB `(uc ~T0 @X0 1 ef ]
+"157
+{
+[; ;RGBChroma.c: 156: uint8_t receiveRGB()
+[; ;RGBChroma.c: 157: {
+[e :U _receiveRGB ]
+[f ]
+[; ;RGBChroma.c: 258: }
+"258
+[e :UE 449 ]
+}
+"287
+[v _putch `(v ~T0 @X0 1 ef1`uc ]
+"288
+{
+[; ;RGBChroma.c: 287: void putch(char data)
+[; ;RGBChroma.c: 288: {
+[e :U _putch ]
+"287
+[v _data `uc ~T0 @X0 1 r1 ]
+"288
+[f ]
+[; ;RGBChroma.c: 289: if (1 == RCSTAbits.SPEN)
+"289
+[e $ ! == -> 1 `i -> . . _RCSTAbits 0 7 `i 451  ]
+[; ;RGBChroma.c: 290: {
+"290
+{
+[; ;RGBChroma.c: 293: while (!TXIF) continue;
+"293
+[e $U 452  ]
+[e :U 453 ]
+[e $U 452  ]
+[e :U 452 ]
+[e $ ! _TXIF 453  ]
+[e :U 454 ]
+[; ;RGBChroma.c: 294: TXREG = data;
+"294
+[e = _TXREG _data ]
+"295
+}
+[e :U 451 ]
+[; ;RGBChroma.c: 295: }
+[; ;RGBChroma.c: 296: }
+"296
+[e :UE 450 ]
 }

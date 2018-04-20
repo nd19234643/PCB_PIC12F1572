@@ -17,17 +17,16 @@
 #define _XTAL_FREQ   16000000  //Used by the XC8 delay_ms(x) macro
 #define __delay_us(x) _delay((unsigned long)((x)*(_XTAL_FREQ/4000000.0)))
 #define __delay_ms(x) _delay((unsigned long)((x)*(_XTAL_FREQ/4000.0)))
+#define DIRECTION_LIGHT_SQUARE_WAVE         PORTAbits.RA4
 //#define LED_A5          PORTAbits.RA5
-#define g_Direction         PORTAbits.RA4
 // AN1562 - Added define to omit interrupts
 #define INTERRUPTS_NOT_USED// PROTOTYPES
-    void            Example_System_Init (void);
 // AN1562 - Added test for INTERRUPTS_NOT_USED)
-
-  //  void interrupt  ISR                 (void);
+//  void interrupt  ISR                 (void);
+void Example_System_Init (void);
 
 // {LeonHuang20180313+ [Optimization] 
-#define SIZE 208 // unit: byte 
+#define SIZE 214 // unit: byte 
 #define DELAY_TIME 20 // unit: ms 
 
 // Optimization 
@@ -72,8 +71,8 @@ void interrupt InterruptHandlerLow ()
 {
     unsigned char cUART_char = 0;
 
-    if (PIR1bits.RCIF == 1) // is interrupt occured by EUSART receive?,
-    {                               // then RCREG is full we have new data (cleared when RCREG is read)
+    if (PIR1bits.RCIF == 1) // The RCIF interrupt flag bit will be set when there is an unread character in the FIFO
+    {
                                
         // if(RCSTA&0x06) //more efficient way than following commented method to check for reception error
         if (RCSTAbits.FERR == 1 || RCSTAbits.OERR == 1)
@@ -204,10 +203,8 @@ void main(void)
 {
 //    unsigned char i = 0;
     
-    __delay_ms(100); 
-    
     Example_System_Init();    
-    EUSARTInit();
+    initEUSART();
             
     //TMR2ON =1;
     // INTCONbits.GIE = 1;             // Initialization complete. Begin servicing interrupts.
@@ -332,7 +329,7 @@ void main(void)
 //            __delay_ms(20);  
 //        }
 //            
-//        if ( g_Direction == 0)
+//        if ( DIRECTION_LIGHT_SQUARE_WAVE == 0)
 //            sensorVal_1 = 0;    
 //        else
 //            sensorVal_1 = 1;
@@ -341,40 +338,21 @@ void main(void)
         // LeonHuang20180313-}
     }
 }
-//================================================================================================
-//  _____                           _        ____            _                   ___       _ _   
-// | ____|_  ____ _ _ __ ___  _ __ | | ___  / ___| _   _ ___| |_ ___ _ __ ___   |_ _|_ __ (_) |_ 
-// |  _| \ \/ / _` | '_ ` _ \| '_ \| |/ _ \ \___ \| | | / __| __/ _ \ '_ ` _ \   | || '_ \| | __|
-// | |___ >  < (_| | | | | | | |_) | |  __/  ___) | |_| \__ \ ||  __/ | | | | |  | || | | | | |_ 
-// |_____/_/\_\__,_|_| |_| |_| .__/|_|\___| |____/ \__, |___/\__\___|_| |_| |_| |___|_| |_|_|\__|
-//                           |_|                   |___/                          
-//================================================================================================               
 
 void Example_System_Init() 
 {
-
-   
-        #if     _XTAL_FREQ == 32000000
-            OSCCON  = 0b11110000;       // PLL=on,  IRCF=8  MHz, SCS=Fosc
-        #elif   _XTAL_FREQ == 16000000
-            OSCCON  = 0b01111000;       // PLL=off, IRCF=16 MHz, SCS=Fosc
-        #else
-            #error Unsupported clock frequency, edit _XTAL_FREQ in mTouch_config.h
-        #endif
+#if     _XTAL_FREQ == 32000000
+    OSCCON  = 0b11110000;       // PLL=on, IRCF=8 MHz, SCS=00 -> CONFIG1.FOSC
+#elif   _XTAL_FREQ == 16000000
+    OSCCON  = 0b01111000;       // PLL = off, IRCF = 16 MHz, SCS = 00 -> CONFIG1.FOSC
+#else
+    #error Unsupported clock frequency, edit _XTAL_FREQ in mTouch_config.h
+#endif
   
     ANSELA      = 0b00000000;           // all inputs digital
     LATA        = 0b00110100;           // RA2=1, RA4=1, RA5=1      -? all led's off by default.
     TRISA       = 0b00010000;           // all PORT A configured as outputs
-
 }
-//================================================================================================
-//  _____                           _        ___ ____  ____  
-// | ____|_  ____ _ _ __ ___  _ __ | | ___  |_ _/ ___||  _ \ 
-// |  _| \ \/ / _` | '_ ` _ \| '_ \| |/ _ \  | |\___ \| |_) |
-// | |___ >  < (_| | | | | | | |_) | |  __/  | | ___) |  _ < 
-// |_____/_/\_\__,_|_| |_| |_| .__/|_|\___| |___|____/|_| \_\
-//                           |_|                                                                                     
-//================================================================================================
 
 // AN1562 - added test for INTERRUPTS_NOT_USED
 /**/
@@ -391,13 +369,13 @@ void interrupt ISR(void)
 void Stop_turning_LR(){
 	
   if(g_counter==0){
-    if( g_Direction == 1){ 
+    if( DIRECTION_LIGHT_SQUARE_WAVE == 1){ 
 		  TurningR_counter++; 
       TurningL_counter= 0;
 	   }
 
 
-	   if( g_Direction == 0){
+	   if( DIRECTION_LIGHT_SQUARE_WAVE == 0){
         TurningL_counter++;
         TurningR_counter= 0;
         
@@ -443,7 +421,7 @@ void initTimer0()
 void checkFrequencyRange()
 {
     // Count positive and negative 
-    if (g_Direction == 0)
+    if (DIRECTION_LIGHT_SQUARE_WAVE == 0)
     {
         tempNegativeVal += 1;
 
@@ -487,7 +465,7 @@ void checkFrequencyRange()
             putch('0');
             putch('\r');
             putch('\n');
-            //putch(g_Direction);
+            //putch(DIRECTION_LIGHT_SQUARE_WAVE);
         }
         else
         {
@@ -495,7 +473,7 @@ void checkFrequencyRange()
             putch('1');   
             putch('\r');
             putch('\n');
-            //putch(g_Direction);
+            //putch(DIRECTION_LIGHT_SQUARE_WAVE);
         }
 
         freqCount = 0;
